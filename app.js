@@ -41,12 +41,12 @@ raspi.init(()=> {
         baudRate: 19200
     });
 
-    const inputTX = new gpio.DigitalOutput({
+    const outputTX = new gpio.DigitalOutput({
         pin: 'GPIO8',
         pullResistor: gpio.PULL_DOWN
     });
 
-    const inputRX = new gpio.DigitalOutput({
+    const outputRX = new gpio.DigitalOutput({
         pin: 'GPIO10',
         pullResistor: gpio.PULL_UP
     });
