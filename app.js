@@ -5,7 +5,7 @@ let logger = require('morgan');
 let bodyParser = require("body-parser");
 let raspi = require("raspi");
 const gpio = require('raspi-gpio');
-const serial = require("raspi-serial").Serial;
+const Serial = require("raspi-serial").Serial;
 let async = require("async");
 let isEqual = require('arraybuffer-equal');
 
