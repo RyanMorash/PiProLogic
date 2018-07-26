@@ -90,7 +90,7 @@ raspi.init(()=> {
 
     serial.open(() => {
         let automationDetails = {};
-        automationDetails.poolTemperature = "85 F";
+        automationDetails.poolTemperature = null;
         automationDetails.airTemperature = null;
         automationDetails.saltLevel = null;
         automationDetails.time = null;
