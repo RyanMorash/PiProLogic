@@ -4,26 +4,29 @@ let path = require('path');
 let logger = require('morgan');
 let bodyParser = require("body-parser");
 let raspi = require("raspi");
-const gpio = require('raspi-gpio');
-const Serial = require("raspi-serial").Serial;
+let gpio = require('raspi-gpio');
+let Serial = require("raspi-serial").Serial;
 let async = require("async");
 let isEqual = require('arraybuffer-equal');
 
 const KEEP_ALIVE = new Uint8Array([0x10, 0x02, 0x01, 0x01, 0x00, 0x14, 0x10, 0x03]).buffer;
+const UseCORS  = /^true$/i.test(process.env.CORS);
+let device = process.env.DEVICE || "/dev/ttyAMA0";
 
 raspi.init(()=> {
-    var app = express();
-    var logFormat = "'[:date[iso]] - :remote-addr - :method :url :status :response-time ms - :res[content-length]b'";
+
+    let app = express();
+    let logFormat = "'[:date[iso]] - :remote-addr - :method :url :status :response-time ms - :res[content-length]b'";
     app.use(logger(logFormat));
     app.use(bodyParser.text({type: '*/*'}));
 
     // catch 404 and forward to error handler
-    app.use(function(req, res, next) {
+    app.use(function (req, res, next) {
         next(createError(404));
     });
 
     // error handler
-    app.use(function(err, req, res, next) {
+    app.use(function (err, req, res, next) {
         // set locals, only providing error in development
         res.locals.message = err.message;
         res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -33,10 +36,7 @@ raspi.init(()=> {
         res.render('error');
     });
 
-    const UseCORS  = /^true$/i.test(process.env.CORS);
-    var device = process.env.DEVICE || "/dev/ttyAMA0";
-
-    var serial = new Serial({
+    let serial = new Serial({
         portId: device,
         baudRate: 19200
     });
@@ -51,18 +51,18 @@ raspi.init(()=> {
         pullResistor: gpio.PULL_UP
     });
 
-    function handlePacket(packet) {
-        if (!isEqual(packet.data, KEEP_ALIVE)){
-            console.log("Found packet with this data: " + packet);
-        }
-    }
-
     const MAX_PACKET = 1024;
     let packet = new Uint8Array(MAX_PACKET);
     let packetSize = 0;
     let foundFirst = false;
     let foundSecond = false;
     let foundSecondLast = false;
+
+    function handlePacket(packet) {
+        if (!isEqual(packet.data, KEEP_ALIVE)) {
+            console.log("Found packet with this data: " + packet);
+        }
+    }
 
     function handleByteReceived(value) {
         if (packetSize > MAX_PACKET) {
@@ -104,35 +104,37 @@ raspi.init(()=> {
         }
     }
 
-    serial.open(()=> {
-        var automationDetails = new Object();
-        automationDetails.poolTemperature = null;
+    serial.open(() => {
+        let automationDetails = {};
+        automationDetails.poolTemperature = "85 F";
         automationDetails.airTemperature = null;
         automationDetails.saltLevel = null;
         automationDetails.time = null;
 
-      UseCORS && app.use(function(req, res, next) {
-          res.header("Access-Control-Allow-Origin", "*");
-          res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-          next();
-      });
+        serial.on('data', function (data) {
+            for (const value of data.values()) {
+                handleByteReceived(value);
+            }
+        });
 
-      serial.on('data', function(data) {
-          for (const value of data.values()) {
-              handleByteReceived(value);
-          }
-      });
-      
-      
+        UseCORS && app.use(function (req, res, next) {
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            next();
+        });
 
-      app.get('/pooltemp', function(req, res){
-        async.until(
-          function(){return typeof automationDetails.poolTemperature !== "undefined"},
-          function(callback){setTimeout(callback, 10)},
-          function(){res.send(automationDetails.poolTemperature)}
-        );
-      });
+        app.get('/pooltemp', function (req, res) {
+            async.until(
+                function () {
+                    return typeof automationDetails.poolTemperature !== "undefined"
+                },
+                function (callback) {
+                    setTimeout(callback, 10)
+                },
+                function () {
+                    res.send(automationDetails.poolTemperature)
+                }
+            );
+        });
     });
-
-
 });
