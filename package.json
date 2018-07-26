@@ -1,0 +1,25 @@
+{
+  "name": "piprologic",
+  "version": "0.0.1",
+  "description": "REST API for the Hayward Goldline ProLogic",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Dan Bean",
+  "license": "MIT",
+  "dependencies": {
+    "arraybuffer-equal": "^1.0.4",
+    "async": "^1.5.0",
+    "body-parser": "^1.12.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.0",
+    "http-errors": "~1.6.2",
+    "morgan": "~1.9.0",
+    "raspi": "^5.0.2",
+    "raspi-serial": "^5.0.0"
+  }
+}
