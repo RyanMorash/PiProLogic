@@ -136,5 +136,7 @@ raspi.init(()=> {
                 }
             );
         });
+
+        app.listen(process.env.PORT || 8181);
     });
 });
