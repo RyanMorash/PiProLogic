@@ -14,7 +14,7 @@ const KEEP_ALIVE = new Uint8Array([0x10, 0x02, 0x01, 0x01, 0x00, 0x14, 0x10, 0x0
 raspi.init(()=> {
     var app = express();
     var logFormat = "'[:date[iso]] - :remote-addr - :method :url :status :response-time ms - :res[content-length]b'";
-    app.use(morgan(logFormat));
+    app.use(logger(logFormat));
     app.use(bodyParser.text({type: '*/*'}));
 
     // catch 404 and forward to error handler
