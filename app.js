@@ -47,7 +47,7 @@ raspi.init(()=> {
     });
 
     const inputRX = new gpio.DigitalOutput({
-        pint: 'GPIO10',
+        pin: 'GPIO10',
         pullResistor: gpio.PULL_UP
     });
 
